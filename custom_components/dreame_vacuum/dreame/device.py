@@ -1515,13 +1515,23 @@ class DreameVacuumDevice:
 
     def _dnd_task_changed(self, previous_dnd_task: Any = None) -> None:
         dnd_tasks = self.get_property(DreameVacuumProperty.DND_TASK)
+        dnd_list = []
         if dnd_tasks and dnd_tasks != "":
-            self.status.dnd_tasks = [
+            dnd_list = [
                 DNDTask(task.get("id"), task.get("en"), task.get("st"), task.get("et"), task.get("wk"), task.get("ss"))
                 for task in json.loads(dnd_tasks)
             ]
-        else:
-            self.status.dnd_tasks = []
+        if dnd_list and len(dnd_list) > 1:
+            dnd_list.sort(
+                key=cmp_to_key(
+                    lambda a, b: (
+                        b.id - a.id
+                        if a.start == b.start
+                        else int(a.start.replace(":", "")) - int(b.start.replace(":", ""))
+                    )
+                )
+            )
+        self.status.dnd_tasks = dnd_list
 
     def _schedule_changed(self, previous_schedule: Any = None) -> None:
         schedule = self.get_property(DreameVacuumProperty.SCHEDULE)
@@ -3814,8 +3824,8 @@ class DreameVacuumDevice:
             return self.set_property(DreameVacuumProperty.WETNESS_LEVEL, int(wetness_level))
         return False
 
-    def set_dnd_task(self, enabled: bool, dnd_start: str, dnd_end: str) -> bool:
-        """Set do not disturb task"""
+    def set_dnd_tasks(self, enabled: bool, dnd_start: str, dnd_end: str) -> bool:
+        """Set do not disturb tasks"""
         if dnd_start is None or dnd_start == "":
             dnd_start = "22:00"
 
@@ -3869,7 +3879,7 @@ class DreameVacuumDevice:
         return (
             self.set_property(DreameVacuumProperty.DND, bool(enabled))
             if not self.capability.dnd_task
-            else self.set_dnd_task(bool(enabled), self.status.dnd_start, self.status.dnd_end)
+            else self.set_dnd_tasks(bool(enabled), self.status.dnd_start, self.status.dnd_end)
         )
 
     def set_dnd_start(self, dnd_start: str) -> bool:
@@ -3877,14 +3887,14 @@ class DreameVacuumDevice:
         return (
             self.set_property(DreameVacuumProperty.DND_START, dnd_start)
             if not self.capability.dnd_task
-            else self.set_dnd_task(self.status.dnd, str(dnd_start), self.status.dnd_end)
+            else self.set_dnd_tasks(self.status.dnd, str(dnd_start), self.status.dnd_end)
         )
 
     def set_dnd_end(self, dnd_end: str) -> bool:
         """Set do not disturb function"""
         if not self.capability.dnd_task:
             return self.set_property(DreameVacuumProperty.DND_END, dnd_end)
-        return self.set_dnd_task(self.status.dnd, self.status.dnd_start, str(dnd_end))
+        return self.set_dnd_tasks(self.status.dnd, self.status.dnd_start, str(dnd_end))
 
     def set_off_peak_charging_config(self, enabled: bool, start: str, end: str) -> bool:
         """Set of peak charging config"""
@@ -3983,7 +3993,7 @@ class DreameVacuumDevice:
             properties[DreameVacuumProperty.SILENT_DRYING] = 0
         self.set_properties(properties)
 
-    def delete_schedule(self, schedule_id) -> dict[str, Any] | None:
+    def delete_scheduled_task(self, schedule_id) -> dict[str, Any] | None:
         """Delete a scheduled task."""
         found = False
         for schedule in self.status.schedule:
@@ -4007,17 +4017,49 @@ class DreameVacuumDevice:
             self.set_property(DreameVacuumProperty.SCHEDULE, schedule)
 
         response = self.call_action(
-            DreameVacuumAction.DELETE_SCHEDULE,
+            DreameVacuumAction.DELETE_SCHEDULED_TASK,
             [
                 {
                     "piid": PIID(DreameVacuumProperty.SCHEDULE_ID, self.property_mapping),
                     "value": schedule_id,
                 }
-            ],
+            ]
         )
         self.schedule_update(3, True)
         if not response or response.get("code") != 0:
             self.set_property(DreameVacuumProperty.SCHEDULE, schedule_list)
+        return response
+
+    def delete_dnd_task(self, dnd_id) -> dict[str, Any] | None:
+        """Delete a dnd task."""
+        found = False
+        for dnd in self.status.dnd_tasks:
+            if str(dnd.id) == str(dnd_id):
+                found = True
+                break
+
+        if not found:
+            raise InvalidActionException(f"DnD task not found! (%s)", dnd_id)
+
+        dnd_list = self.get_property(DreameVacuumProperty.DND_TASK)
+        if dnd_list and dnd_list != "":
+            self.set_property(
+                DreameVacuumProperty.DND_TASK,
+                str(json.dumps([task for task in json.loads(dnd_list) if str(task.get("id")) != str(dnd_id)], separators=(",", ":"))).replace(" ", "")
+            )
+
+        response = self.call_action(
+            DreameVacuumAction.DELETE_DND_TASK,
+            [
+                {
+                    "piid": PIID(DreameVacuumProperty.DND_TASK, self.property_mapping),
+                    "value": dnd_id,
+                }
+            ],
+        )
+        self.schedule_update(3, True)
+        if not response or response.get("code") != 0:
+            self.set_property(DreameVacuumProperty.DND_TASK, dnd_list)
         return response
 
     def locate(self) -> dict[str, Any] | None:
@@ -4922,7 +4964,7 @@ class DreameVacuumDevice:
                             else bool(shortcut["state"] == "0" or shortcut["state"] == "1")
                         )
                         name = base64.decodebytes(shortcut["name"].encode("utf8")).decode("utf-8")
-                        new_shortcuts[id] = Shortcut(id=id, index=i, name=name, running=running)
+                        new_shortcuts[id] = Shortcut(id=id, index=i, name=name, running=running, tasks=[])
                         if self.status.shortcuts is not None:
                             if id in self.status.shortcuts:
                                 self.status.shortcuts[id].index = i
@@ -5527,6 +5569,8 @@ class DreameVacuumDevice:
 
     def rename_shortcut(self, shortcut_id: int, shortcut_name: str = "") -> dict[str, Any] | None:
         """Rename a shortcut"""
+        shortcut_id = int(shortcut_id)
+
         if self.status.started:
             raise InvalidActionException("Cannot rename a shortcut while vacuum is running")
 
@@ -5552,18 +5596,7 @@ class DreameVacuumDevice:
 
                 self.status.shortcuts[shortcut_id].name = shortcut_name
                 shortcut_name = base64.b64encode(shortcut_name.encode("utf-8")).decode("utf-8")
-                shortcuts = self.get_property(DreameVacuumProperty.SHORTCUTS)
-                if shortcuts and shortcuts != "":
-                    shortcuts = json.loads(shortcuts)
-                    if shortcuts:
-                        for shortcut in shortcuts:
-                            if shortcut["id"] == shortcut_id:
-                                shortcut["name"] = shortcut_name
-                                break
-                self._update_property(
-                    DreameVacuumProperty.SHORTCUTS,
-                    str(json.dumps(shortcuts, separators=(",", ":"))).replace(" ", ""),
-                )
+                self._property_changed(False)
 
                 success = False
                 response = self.call_shortcut_action(
@@ -5582,6 +5615,8 @@ class DreameVacuumDevice:
 
     def delete_shortcut(self, shortcut_id: int) -> dict[str, Any] | None:
         """Delete a shortcut"""
+        shortcut_id = int(shortcut_id)
+
         if not self.capability.shortcuts or not self.status.shortcuts:
             raise InvalidActionException("Shortcuts are not supported on this device")
 
@@ -5596,20 +5631,8 @@ class DreameVacuumDevice:
         if self.status.started and current_shortcut.running:
             raise InvalidActionException("Cannot delete this shortcut while vacuum is running")
 
-        shortcuts = self.get_property(DreameVacuumProperty.SHORTCUTS)
-        if shortcuts and shortcuts != "":
-            shortcuts = json.loads(shortcuts)
-            if shortcuts:
-                for shortcut in shortcuts:
-                    if shortcut["id"] == shortcut_id:
-                        shortcuts.remove(shortcut)
-                        break
-
         del self.status.shortcuts[shortcut_id]
-        self._update_property(
-            DreameVacuumProperty.SHORTCUTS,
-            str(json.dumps(shortcuts, separators=(",", ":"))).replace(" ", ""),
-        )
+        self._property_changed(False)
 
         success = False
         response = self.call_shortcut_action(

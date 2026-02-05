@@ -7102,8 +7102,6 @@ class DreameVacuumMapRenderer:
         station_status: int = 0,
         as_string: bool = True,
     ) -> str:
-        now = time.time()
-
         resources = DreameVacuumMapRenderer.get_resources(capability, icon_set) if include_resources else None
 
         if not map_data or map_data.empty_map or (map_data.dimensions.width * map_data.dimensions.height) < 2:
@@ -7647,20 +7645,13 @@ class DreameVacuumMapRenderer:
             )
 
         if as_string:
-            map_data_json = json.dumps(
+            return json.dumps(
                 map_data_json,
                 default=lambda o: dict((key, value) for key, value in o.__dict__.items() if value is not None),
                 allow_nan=False,
                 sort_keys=True,
                 separators=(",", ":"),
             )
-
-        _LOGGER.info(
-            "Convert Map Data: %s:%s took: %.2f",
-            map_data.map_id,
-            map_data.frame_id,
-            time.time() - now,
-        )
         return map_data_json
 
     def render_obstacle_image(

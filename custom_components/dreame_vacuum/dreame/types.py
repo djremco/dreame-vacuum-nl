@@ -1416,36 +1416,37 @@ class DreameVacuumAction(IntEnum):
     START_WASHING = 7
     GET_PHOTO_INFO = 8
     SHORTCUTS = 9
-    REQUEST_MAP = 10
-    UPDATE_MAP_DATA = 11
-    BACKUP_MAP = 12
-    WIFI_MAP = 13
-    LOCATE = 14
-    TEST_SOUND = 15
-    DELETE_SCHEDULE = 16
-    DELETE_CRUISE_SCHEDULE = 17
-    RESET_MAIN_BRUSH = 18
-    RESET_SIDE_BRUSH = 19
-    RESET_FILTER = 20
-    RESET_SENSOR = 21
-    START_AUTO_EMPTY = 22
-    RESET_TANK_FILTER = 23
-    RESET_MOP_PAD = 24
-    RESET_SILVER_ION = 25
-    RESET_DETERGENT = 26
-    RESET_SQUEEGEE = 27
-    RESET_DIRTY_WATER_CHANNEL = 28
-    RESET_ONBOARD_DIRTY_WATER_TANK = 29
-    RESET_DEODORIZER = 30
-    RESET_WHEEL = 31
-    RESET_SCALE_INHIBITOR = 32
-    RESET_FLUFFING_ROLLER = 33
-    RESET_ROLLER_MOP_FILTER = 34
-    RESET_WATER_OUTLET_FILTER = 35
-    STREAM_VIDEO = 36
-    STREAM_AUDIO = 37
-    STREAM_PROPERTY = 38
-    STREAM_CODE = 39
+    DELETE_DND_TASK = 10
+    REQUEST_MAP = 11
+    UPDATE_MAP_DATA = 12
+    BACKUP_MAP = 13
+    WIFI_MAP = 14
+    LOCATE = 15
+    TEST_SOUND = 16
+    DELETE_SCHEDULED_TASK = 17
+    DELETE_CRUISE_SCHEDULE = 18
+    RESET_MAIN_BRUSH = 19
+    RESET_SIDE_BRUSH = 20
+    RESET_FILTER = 21
+    RESET_SENSOR = 22
+    START_AUTO_EMPTY = 23
+    RESET_TANK_FILTER = 24
+    RESET_MOP_PAD = 25
+    RESET_SILVER_ION = 26
+    RESET_DETERGENT = 27
+    RESET_SQUEEGEE = 28
+    RESET_DIRTY_WATER_CHANNEL = 29
+    RESET_ONBOARD_DIRTY_WATER_TANK = 30
+    RESET_DEODORIZER = 31
+    RESET_WHEEL = 32
+    RESET_SCALE_INHIBITOR = 33
+    RESET_FLUFFING_ROLLER = 34
+    RESET_ROLLER_MOP_FILTER = 35
+    RESET_WATER_OUTLET_FILTER = 36
+    STREAM_VIDEO = 37
+    STREAM_AUDIO = 38
+    STREAM_PROPERTY = 39
+    STREAM_CODE = 40
 
 
 # Dreame Vacuum property mapping
@@ -1758,13 +1759,14 @@ DreameVacuumActionMapping = {
     DreameVacuumAction.START_WASHING: {siid: 4, aiid: 4},
     DreameVacuumAction.GET_PHOTO_INFO: {siid: 4, aiid: 6},
     DreameVacuumAction.SHORTCUTS: {siid: 4, aiid: 8},
+    DreameVacuumAction.DELETE_DND_TASK: {siid: 5, aiid: 1},
     DreameVacuumAction.REQUEST_MAP: {siid: 6, aiid: 1},
     DreameVacuumAction.UPDATE_MAP_DATA: {siid: 6, aiid: 2},
     DreameVacuumAction.BACKUP_MAP: {siid: 6, aiid: 3},
     DreameVacuumAction.WIFI_MAP: {siid: 6, aiid: 4},
     DreameVacuumAction.LOCATE: {siid: 7, aiid: 1},
     DreameVacuumAction.TEST_SOUND: {siid: 7, aiid: 2},
-    DreameVacuumAction.DELETE_SCHEDULE: {siid: 8, aiid: 1},
+    DreameVacuumAction.DELETE_SCHEDULED_TASK: {siid: 8, aiid: 1},
     DreameVacuumAction.DELETE_CRUISE_SCHEDULE: {siid: 8, aiid: 2},
     DreameVacuumAction.RESET_MAIN_BRUSH: {siid: 9, aiid: 1},
     DreameVacuumAction.RESET_SIDE_BRUSH: {siid: 10, aiid: 1},
@@ -2219,6 +2221,7 @@ DISCARDED_PROPERTIES: Final = [
     DreameVacuumProperty.MAP_RECOVERY_STATUS,
     DreameVacuumProperty.OFF_PEAK_CHARGING,
     DreameVacuumProperty.SCHEDULE,
+    DreameVacuumProperty.DND_TASK,
     DreameVacuumProperty.KEEP_ALIVE,
 ]
 

@@ -1,4 +1,4 @@
-"""Config flow for Dremae Vacuum."""
+"""Config flow for Dreame Vacuum."""
 
 from __future__ import annotations
 from typing import Any, Final
