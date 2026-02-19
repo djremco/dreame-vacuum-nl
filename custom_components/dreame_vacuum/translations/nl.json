@@ -48,31 +48,31 @@
         "data": {
           "code": "Code"
         },
-        "description": "## Captcha verification is required.\n![captcha](data:image/jpeg;base64,{img})"
+        "description": "## Captcha-verificatie is vereist.\n![captcha](data:image/jpeg;base64,{img})"
       },
       "devices": {
         "data": {
-          "devices": "Supported Devices"
+          "devices": "Ondersteunde apparaten"
         },
-        "description": "Please select the Dreame Vacuum device you want to setup."
+        "description": "Selecteer het Dreame-stofzuigerapparaat dat u wilt instellen."
       },
       "donation": {
         "data": {
-          "donated": "Donated"
+          "donated": "Gedoneerd"
         },
-        "description": "## Do not forget to support the project.{text}"
+        "description": "## Vergeet niet het project te steunen.{text}"
       },
       "options": {
         "data": {
-          "name": "Name",
-          "color_scheme": "Map color scheme",
-          "icon_set": "Map icon set",
-          "notify": "Notification",
-          "hidden_map_objects": "Hidden map objects"
+          "name": "Naam",
+          "color_scheme": "Kleurenschema van de kaart",
+          "icon_set": "Kaartpictogrammenset",
+          "notify": "Meldingen",
+          "hidden_map_objects": "Verborgen kaartobjecten"
         }
       },
       "reauth_confirm": {
-        "description": "Dreame Vacuum integration needs to re-authenticate your account in order to update the tokens or add missing cloud credentials.",
+        "description": "Voor de integratie met Dreame Vacuum is het nodig uw account opnieuw te authenticeren om de tokens bij te werken of ontbrekende cloudgegevens toe te voegen.",
         "title": "Reauthenticate Integration"
       }
     }
